@@ -19,7 +19,7 @@ struct Node{
 };
 
 // I'm tired of writing allat
-typedef std::unordered_map<std::string, Node> database_t; 
+using database_t = std::unordered_map<std::string, Node>; 
 
 // Basic functions to get all the nodes from the current loaded graph and add nodes to it
 void printNodes(const database_t& graph);
@@ -34,6 +34,10 @@ void linkNodes(database_t& graph, int argc, char* arguments[]);
 // Check if useless linking is done if A reaches B and B reaches C then A shouldn't reach C.
 bool isReachable(const database_t& graph, const std::string& startID, const std::string& targetID);
 bool dfs(const database_t& graph, std::unordered_set<std::string>& visited, const std::string& current, const std::string& target);
+
+void spofReport(const database_t& graph);
+
+std::unordered_set<std::string> simulate(const std::string& nodeName, const database_t& graph);
 
 // Check what fails when a node fails
 void simulateNodeFailure(char* arguments[], const database_t& graph);
@@ -61,8 +65,11 @@ int main(int argc, char* argv[]){
     else if (argument1 == "link") {linkNodes(retrievedGraph, argc, argv); saveGraph(retrievedGraph);}
 
     else if (argument1 == "simulate") {simulateNodeFailure(argv, retrievedGraph);}
-    // TBD: If unrecognized should throw a help guide/msg
 
+    else if (argument1 == "spof") {spofReport(retrievedGraph);}
+
+
+    else {std::cout << "Helium -- Command not found!" << std::endl;}
     return 0;
 }
 
@@ -254,6 +261,27 @@ bool dfs(const database_t& graph, std::unordered_set<std::string>& visited, cons
     return false;
 }
 
+std::unordered_set<std::string> simulate(const std::string& nodeName, const database_t& graph){
+    std::unordered_set<std::string> failed;
+    failed.emplace(nodeName);
+
+    // Loop through graph to find failed nodes by checking dependencies
+    bool changed = true;
+    while (changed){
+        changed = false;
+        for (const auto& itr : graph){
+            if(failed.find(itr.first) == failed.end()){
+                if (!itr.second.dependencies.empty() && failedDependenciesCheck(itr.second, failed)){
+                    failed.emplace(itr.first);
+                    changed = true;
+                } 
+            } 
+        }
+    }
+
+    return failed;
+}
+
 void simulateNodeFailure(char* arguments[], const database_t& graph){
     std::string nodeName = arguments[2];
 
@@ -262,22 +290,7 @@ void simulateNodeFailure(char* arguments[], const database_t& graph){
         return;
     } else {
         // Start by saving the nodeName in failed
-        std::unordered_set<std::string> failed;
-        failed.emplace(nodeName);
-
-        // Loop through graph to find failed nodes by checking dependencies
-        bool changed = true;
-        while (changed){
-            changed = false;
-            for (const auto& itr : graph){
-                if(failed.find(itr.first) == failed.end()){
-                    if (!itr.second.dependencies.empty() && failedDependenciesCheck(itr.second, failed)){
-                        failed.emplace(itr.first);
-                        changed = true;
-                    } 
-                } 
-            }
-        }
+        std::unordered_set<std::string> failed = simulate(nodeName, graph);
 
         // Print results 
         int failedAssets = 0;
@@ -319,4 +332,34 @@ bool failedDependenciesCheck(const Node& potentialFailedNode, const std::unorder
     }
 
     return true;
+}
+
+void spofReport(const database_t& graph){
+    std::vector<std::pair<std::string, int>> riskRanking;
+
+    for (const auto& itr : graph) {
+        if (itr.second.type == NodeType::Anchor){
+            std::unordered_set<std::string> failedSet = simulate(itr.second.id, graph);
+
+            int assetsFailed = 0;
+            for (const auto& i : failedSet){
+                if (graph.at(i).type == NodeType::Asset){
+                    assetsFailed++;
+                }
+            }
+            
+            if (assetsFailed > 0)
+                riskRanking.emplace_back(itr.second.id, assetsFailed);
+        }
+    }
+
+    std::sort(riskRanking.begin(), riskRanking.end(), [](const auto& a, const auto& b) {
+        return a.second > b.second;
+    });
+
+    std::cout << "Helium SPOF report:" << std::endl;
+    for (const std::pair<std::string, int>& itr : riskRanking){
+        std::cout << itr.first << ": " << itr.second << std::endl;
+    }
+    std::cout << '\n' << std::endl;
 }
