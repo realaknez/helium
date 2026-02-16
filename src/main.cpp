@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "include/audit.hpp"
-#include "include/audit.hpp"
+#include "../include/audit.hpp"
+#include "../include/graph.hpp"
 
 int main(int argc, char* argv[]){
     // Check if there's enough arguments otherwise throw error.

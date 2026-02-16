@@ -1,5 +1,5 @@
 #pragma once
-#include "include/graph.hpp"
+#include "graph.hpp"
 
 // Basic functions to get all the nodes from the current loaded graph and add nodes to it
 void printNodes(const database_t& graph);

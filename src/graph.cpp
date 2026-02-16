@@ -1,6 +1,7 @@
-#include "include/graph.hpp"
+#include "../include/graph.hpp"
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
 database_t loadGraph() {
     // Get graph.db and create an empty graph to be returned with the parsed info.
