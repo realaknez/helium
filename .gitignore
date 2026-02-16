@@ -42,3 +42,6 @@
 
 # Helium local database
 *.db
+
+# VSCode settings
+.vscode/
