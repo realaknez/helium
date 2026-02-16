@@ -35,6 +35,7 @@ void linkNodes(database_t& graph, int argc, char* arguments[]);
 bool isReachable(const database_t& graph, const std::string& startID, const std::string& targetID);
 bool dfs(const database_t& graph, std::unordered_set<std::string>& visited, const std::string& current, const std::string& target);
 
+// Check what fails when a node fails
 void simulateNodeFailure(char* arguments[], const database_t& graph);
 bool failedDependenciesCheck(const Node& potentialFailedNode, const std::unordered_set<std::string>& failedNodes);
 
@@ -193,11 +194,14 @@ void linkNodes(database_t& graph, int argc, char* arguments[]){
         return;
     }
 
+    // Again using string functions to make it easier.
     std::string sourceID = arguments[2];
     std::string targetID = arguments[3];
 
+    // Check if in database initial node and final node exist
     if (graph.find(sourceID) != graph.end() && graph.find(targetID) != graph.end()){
 
+        // An asset cannot be linked to an asset, as well as an anchor to an asset
         if (graph[sourceID].type == NodeType::Asset && graph[targetID].type == NodeType::Asset){
             std::cout << "Invalid type of nodes, you cannot link an asset to an asset!" << std::endl;
             return;
@@ -208,11 +212,12 @@ void linkNodes(database_t& graph, int argc, char* arguments[]){
         {
             std::cout << "Invalid nodes, they are the same node!" << std::endl;
             return;
-        } else if (isReachable(graph, targetID, sourceID))
+        }  // Check to see if useless linking is being done (line 32 for more information)
+        else if (isReachable(graph, targetID, sourceID))
         {
             std::cout << "Helium -- This link would create a circular dependency!" << std::endl;
             return;
-        }
+        } // Last check for if dependency already was added or exists
         if(std::find(graph[sourceID].dependencies.begin(), graph[sourceID].dependencies.end(), graph[targetID].id) != graph[sourceID].dependencies.end()){
             std::cout << "Helium -- Dependency already found in source!" << std::endl;
             return;
@@ -231,12 +236,14 @@ bool isReachable(const database_t& graph, const std::string& startID, const std:
     return dfs(graph, visited, startID, targetID);
 }
 
+// Dfs system for checking useless linking
 bool dfs(const database_t& graph, std::unordered_set<std::string>& visited, const std::string& current, const std::string& target){
     if (current == target)
         return true;
     
     visited.insert(current);
 
+    // Recursive iteration to navigate through the graph
     for (const auto& itr: graph.at(current).dependencies){ 
         if (visited.find(itr) == visited.end()){
             if (dfs(graph, visited, itr, target))
@@ -254,9 +261,11 @@ void simulateNodeFailure(char* arguments[], const database_t& graph){
         std::cout << "Couldn't find node!" << std::endl;
         return;
     } else {
+        // Start by saving the nodeName in failed
         std::unordered_set<std::string> failed;
         failed.emplace(nodeName);
 
+        // Loop through graph to find failed nodes by checking dependencies
         bool changed = true;
         while (changed){
             changed = false;
@@ -269,6 +278,8 @@ void simulateNodeFailure(char* arguments[], const database_t& graph){
                 } 
             }
         }
+
+        // Print results 
         int failedAssets = 0;
         int failedAnchors = 0;
         
@@ -299,6 +310,7 @@ void simulateNodeFailure(char* arguments[], const database_t& graph){
     } 
 }
 
+// Loop through every string in dependencies to see if every dependency has failed if not it is still up.
 bool failedDependenciesCheck(const Node& potentialFailedNode, const std::unordered_set<std::string>& failedNodes){
     for (const std::string i : potentialFailedNode.dependencies){
         if (failedNodes.find(i) == failedNodes.end()){
