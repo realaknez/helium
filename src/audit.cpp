@@ -1,6 +1,7 @@
 #include "../include/audit.hpp"
 #include <iostream>
 #include <algorithm>
+#include <iomanip>
 
 void printNodes(const database_t& graph){
     // Loop through every pair in graph and print the string which is basically the name
@@ -51,8 +52,14 @@ void simulateNodeFailure(char* arguments[], const database_t& graph){
 }
 
 void spofReport(const database_t& graph){
-    std::vector<std::pair<std::string, int>> riskRanking;
-
+    int totalAssets = 0;
+    std::vector<RiskEntry> ranking;
+    for (const auto& itr : graph){
+        if (itr.second.type == NodeType::Asset) {
+            totalAssets++;
+        }
+    }
+    
     for (const auto& itr : graph) {
         if (itr.second.type == NodeType::Anchor){
             std::unordered_set<std::string> failedSet = simulate(itr.second.id, graph);
@@ -64,18 +71,37 @@ void spofReport(const database_t& graph){
                 }
             }
             
-            if (assetsFailed > 0)
-                riskRanking.emplace_back(itr.second.id, assetsFailed);
-        }
+            if (assetsFailed > 0) {
+                RiskEntry entry;
+                entry.anchor = itr.second.id;
+                entry.assetsFailed = assetsFailed;
+                ranking.emplace_back(entry);
+            }
+        } 
     }
 
-    std::sort(riskRanking.begin(), riskRanking.end(), [](const auto& a, const auto& b) {
-        return a.second > b.second;
+    if (totalAssets == 0) {
+        std::cout << "No assets in graph." << std::endl;
+        return;
+    }
+
+    for (auto &i : ranking){
+        i.percent = (i.assetsFailed / (double) totalAssets) * 100;
+    }
+
+    if (ranking.empty()) {
+        std::cout << "No cascading failures detected." << std::endl;
+        return;
+    }
+
+    std::sort(ranking.begin(), ranking.end(), [](const auto& a, const auto& b) {
+        return a.percent > b.percent;
     });
 
+    std::cout << std::fixed << std::setprecision(1);
     std::cout << "Helium SPOF report:" << std::endl;
-    for (const std::pair<std::string, int>& itr : riskRanking){
-        std::cout << itr.first << ": " << itr.second << std::endl;
+    for (const auto& itr : ranking){
+        std::cout << itr.anchor << ": " << itr.assetsFailed << " assets " << "(" << itr.percent << "%)"<< std::endl;
     }
     std::cout << '\n' << std::endl;
 }
