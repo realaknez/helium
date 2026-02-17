@@ -80,6 +80,26 @@ void spofReport(const database_t& graph){
     std::cout << '\n' << std::endl;
 }
 
-void auditReport(){
+void auditReport(const database_t& graph){
+    std::vector<std::string> fragileAssets;
 
+    for (const auto &itr : graph){
+        if (itr.second.type == NodeType::Asset && itr.second.dependencies.size() == 1){
+            fragileAssets.push_back(itr.second.id);
+        }
+    }
+
+    std::cout << "[Helium -- Structural Audit]" << std::endl;
+    std::cout << '\n';
+    if (!fragileAssets.empty()){
+        std::cout << "Assets with single dependency:" << std::endl;
+        for (const auto &i : fragileAssets){
+            std::cout << "- " << i << " which depends on " << graph.at(i).dependencies[0] << std::endl;
+        }
+        std::cout << '\n';
+        std::cout << "Amount of fragile assets: " << fragileAssets.size() << std::endl;
+
+    } else {
+        std::cout << "No single-dependency assets found." << std::endl;
+    } 
 }
