@@ -5,7 +5,7 @@
 void printNodes(const database_t& graph);
 
 void spofReport(const database_t& graph);
-void auditReport();
+void auditReport(const database_t& graph);
 
 // Check what fails when a node fails
 void simulateNodeFailure(char* arguments[], const database_t& graph);
