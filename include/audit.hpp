@@ -1,6 +1,12 @@
 #pragma once
 #include "graph.hpp"
 
+struct RiskEntry {
+    std::string anchor;
+    int assetsFailed;
+    double percent;
+};
+
 // Basic functions to get all the nodes from the current loaded graph and add nodes to it
 void printNodes(const database_t& graph);
 
