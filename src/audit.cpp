@@ -82,10 +82,15 @@ void spofReport(const database_t& graph){
 
 void auditReport(const database_t& graph){
     std::vector<std::string> fragileAssets;
+    std::vector<std::string> vulnerableAnchors;
 
     for (const auto &itr : graph){
         if (itr.second.type == NodeType::Asset && itr.second.dependencies.size() == 1){
             fragileAssets.push_back(itr.second.id);
+        }
+
+        if (itr.second.type == NodeType::Anchor && itr.second.dependencies.size() == 0){
+            vulnerableAnchors.push_back(itr.second.id);
         }
     }
 
@@ -101,5 +106,19 @@ void auditReport(const database_t& graph){
 
     } else {
         std::cout << "No single-dependency assets found." << std::endl;
+    } 
+
+    std::cout << '\n';
+
+    if (!vulnerableAnchors.empty()){
+        std::cout << "Anchors with no backup:" << std::endl;
+        for (const auto &i : vulnerableAnchors){
+            std::cout << "- " << i << std::endl;
+        }
+        std::cout << '\n';
+        std::cout << "Total vulnerable anchors: " << vulnerableAnchors.size() << std::endl;
+
+    } else {
+        std::cout << "All anchors have at least one backup." << std::endl;
     } 
 }
