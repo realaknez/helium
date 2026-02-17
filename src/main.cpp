@@ -1,4 +1,6 @@
 #include <iostream>
+#include <cctype>
+#include <algorithm>
 
 #include "../include/audit.hpp"
 #include "../include/graph.hpp"
@@ -14,6 +16,8 @@ int main(int argc, char* argv[]){
     database_t retrievedGraph = loadGraph();
     // Using argv 1 as a string for further string functions to later check with if statements what does the user want.
     std::string argument1 = argv[1];
+
+    std::transform(argument1.begin(), argument1.end(), argument1.begin(), [](unsigned char c){ return std::tolower(c); });
 
     // Add either asset or anchor to make it more clearer for the user and then saving.
     if (argument1 == "add-asset"){ addNode(retrievedGraph, argc, argv, NodeType::Asset); saveGraph(retrievedGraph);} 
