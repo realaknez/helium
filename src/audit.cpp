@@ -121,4 +121,18 @@ void auditReport(const database_t& graph){
     } else {
         std::cout << "All anchors have at least one backup." << std::endl;
     } 
+
+    std::cout << '\n';
+
+    std::string risk;
+
+    if (vulnerableAnchors.size() > 0){
+        risk = "HIGH";
+    } else if (fragileAssets.size() > 0){
+        risk = "MEDIUM";
+    } else {
+        risk = "LOW";
+    }
+    std::cout << "Overall Structural Risk Level: " << risk << std::endl;
+    
 }
