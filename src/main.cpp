@@ -28,7 +28,7 @@ int main(int argc, char* argv[]){
 
     else if (argument1 == "spof") {spofReport(retrievedGraph);}
 
-    else if (argument1 == "audit") {auditReport();}
+    else if (argument1 == "audit") {auditReport(retrievedGraph);}
 
     else {std::cout << "Helium -- Command not found!" << std::endl;}
     return 0;
