@@ -10,9 +10,11 @@ simulates cascading failures, and identifies structural weaknesses.
 - Add anchors and assets
 - Link dependencies
 - Prevent circular dependencies
-- Failure simulation
-- Single Point of Failure (SPOF) report
-- Structural audit tools
+- Cascading failure simulation
+- Single Point of Failure (SPOF) with % Fragility Score
+- Zero Redundancy detection
+- Anchor backup audit
+- Markdown report export
 
 ## Build
 
