@@ -24,19 +24,22 @@ Compile:
 
 g++ src/main.cpp src/graph.cpp src/audit.cpp -Iinclude -o helium
 
-## Example Usage
+## Usage
 
-Add anchor:
+Add an anchor:
 helium add-anchor primary_email
 
-Add asset:
+Add an asset:
 helium add-asset domain
 
-Link:
+Link asset to anchor:
 helium link domain primary_email
 
-Simulate:
-helium simulate primary_email
+Run structural audit:
+helium audit
 
 Run SPOF report:
 helium spof
+
+Export Markdown report:
+helium export
