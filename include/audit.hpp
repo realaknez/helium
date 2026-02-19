@@ -7,6 +7,11 @@ struct RiskEntry {
     double percent;
 };
 
+struct AuditData {
+    std::vector<std::string> fragileAssets;
+    std::vector<std::string> vulnerableAnchors;
+};
+
 // Basic functions to get all the nodes from the current loaded graph and add nodes to it
 void printNodes(const database_t& graph);
 
@@ -16,3 +21,4 @@ void auditReport(const database_t& graph);
 // Check what fails when a node fails
 void simulateNodeFailure(char* arguments[], const database_t& graph);
 
+void exportMarkdownReport(const database_t& graph);
